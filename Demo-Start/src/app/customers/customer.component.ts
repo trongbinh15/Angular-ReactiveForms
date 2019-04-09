@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn, FormArray } from '@angular/forms';
+
 import { debounceTime } from 'rxjs/operators';
+
 import { Customer } from './customer';
 
 function emailMatcher(c: AbstractControl): { [key: string]: boolean } | null {
@@ -59,7 +61,7 @@ export class CustomerComponent implements OnInit {
       notification: 'email',
       rating: [null, ratingRange(1, 5)],
       sendCatalog: true,
-      addresses: this.fb.array([this.buildAddress()])
+      addresses: this.fb.array([ this.buildAddress() ])
     });
 
     this.customerForm.get('notification').valueChanges.subscribe(
@@ -67,13 +69,11 @@ export class CustomerComponent implements OnInit {
     );
 
     const emailControl = this.customerForm.get('emailGroup.email');
-    emailControl.valueChanges
-      .pipe(
-        debounceTime(1000)
-      )
-      .subscribe(
-        value => this.setMessage(emailControl)
-      );
+    emailControl.valueChanges.pipe(
+      debounceTime(1000)
+    ).subscribe(
+      value => this.setMessage(emailControl)
+    );
   }
 
   addAddress(): void {
@@ -91,15 +91,6 @@ export class CustomerComponent implements OnInit {
     });
   }
 
-  setMessage(c: AbstractControl): void {
-    console.log(c);
-    this.emailMessage = '';
-    if ((c.touched || c.dirty) && c.errors) {
-      this.emailMessage = Object.keys(c.errors).map(
-        key => this.emailMessage += this.validationMessages[key]).join(' ');
-    }
-  }
-
   populateTestData(): void {
     this.customerForm.patchValue({
       firstName: 'Jack',
@@ -111,6 +102,15 @@ export class CustomerComponent implements OnInit {
   save() {
     console.log(this.customerForm);
     console.log('Saved: ' + JSON.stringify(this.customerForm.value));
+  }
+
+  setMessage(c: AbstractControl): void {
+    this.emailMessage = '';
+    console.log(this.validationMessages);
+    if ((c.touched || c.dirty) && c.errors) {
+      this.emailMessage = Object.keys(c.errors).map(
+        key => this.emailMessage += this.validationMessages[key]).join(' ');
+    }
   }
 
   setNotification(notifyVia: string): void {
