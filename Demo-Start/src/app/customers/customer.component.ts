@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
-
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn, FormArray } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 import { Customer } from './customer';
 
 function emailMatcher(c: AbstractControl): { [key: string]: boolean } | null {
@@ -34,6 +34,16 @@ function ratingRange(min: number, max: number): ValidatorFn {
 export class CustomerComponent implements OnInit {
   customerForm: FormGroup;
   customer = new Customer();
+  emailMessage: string;
+
+  get addresses(): FormArray {
+    return <FormArray>this.customerForm.get('addresses');
+  }
+
+  private validationMessages = {
+    required: 'Please enter your email address.',
+    email: 'Please enter a valid email address.'
+  };
 
   constructor(private fb: FormBuilder) { }
 
@@ -48,8 +58,46 @@ export class CustomerComponent implements OnInit {
       phone: '',
       notification: 'email',
       rating: [null, ratingRange(1, 5)],
-      sendCatalog: true
+      sendCatalog: true,
+      addresses: this.fb.array([this.buildAddress()])
     });
+
+    this.customerForm.get('notification').valueChanges.subscribe(
+      value => this.setNotification(value)
+    );
+
+    const emailControl = this.customerForm.get('emailGroup.email');
+    emailControl.valueChanges
+      .pipe(
+        debounceTime(1000)
+      )
+      .subscribe(
+        value => this.setMessage(emailControl)
+      );
+  }
+
+  addAddress(): void {
+    this.addresses.push(this.buildAddress());
+  }
+
+  buildAddress(): FormGroup {
+    return this.fb.group({
+      addressType: 'home',
+      street1: '',
+      street2: '',
+      city: '',
+      state: '',
+      zip: ''
+    });
+  }
+
+  setMessage(c: AbstractControl): void {
+    console.log(c);
+    this.emailMessage = '';
+    if ((c.touched || c.dirty) && c.errors) {
+      this.emailMessage = Object.keys(c.errors).map(
+        key => this.emailMessage += this.validationMessages[key]).join(' ');
+    }
   }
 
   populateTestData(): void {
