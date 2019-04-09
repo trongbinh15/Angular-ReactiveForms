@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgForm, FormGroup, FormBuilder, Validator, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 
 import { Customer } from './customer';
 
@@ -10,6 +10,7 @@ function emailMatcher(c: AbstractControl): { [key: string]: boolean } | null {
   if (emailControl.pristine || confirmControl.pristine) {
     return null;
   }
+
   if (emailControl.value === confirmControl.value) {
     return null;
   }
@@ -18,11 +19,11 @@ function emailMatcher(c: AbstractControl): { [key: string]: boolean } | null {
 
 function ratingRange(min: number, max: number): ValidatorFn {
   return (c: AbstractControl): { [key: string]: boolean } | null => {
-    if (c.value != null && (isNaN(c.value) && c.value < min || c.value > max)) {
+    if (c.value !== null && (isNaN(c.value) || c.value < min || c.value > max)) {
       return { 'range': true };
     }
     return null;
-  }
+  };
 }
 
 @Component({
@@ -44,27 +45,24 @@ export class CustomerComponent implements OnInit {
         email: ['', [Validators.required, Validators.email]],
         confirmEmail: ['', Validators.required],
       }, { validator: emailMatcher }),
-      sendCatalog: true,
       phone: '',
+      notification: 'email',
       rating: [null, ratingRange(1, 5)],
-      notification: 'email'
+      sendCatalog: true
     });
-
-
   }
 
   populateTestData(): void {
     this.customerForm.patchValue({
       firstName: 'Jack',
-      lastName: 'Harkd',
-      email: 'ajshaksdh@hdfhsd',
+      lastName: 'Harkness',
       sendCatalog: false
     });
   }
 
-  save(customerForm: NgForm) {
-    console.log(customerForm.form);
-    console.log('Saved: ' + JSON.stringify(customerForm.value));
+  save() {
+    console.log(this.customerForm);
+    console.log('Saved: ' + JSON.stringify(this.customerForm.value));
   }
 
   setNotification(notifyVia: string): void {
@@ -76,4 +74,5 @@ export class CustomerComponent implements OnInit {
     }
     phoneControl.updateValueAndValidity();
   }
+
 }

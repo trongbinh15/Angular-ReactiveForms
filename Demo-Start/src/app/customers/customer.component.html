@@ -5,7 +5,7 @@
 
   <div class="card-body">
     <form novalidate
-          (ngSubmit)="save(signupForm)"
+          (ngSubmit)="save()"
           [formGroup]="customerForm">
 
       <div class="form-group row mb-2">
@@ -49,7 +49,8 @@
           </span>
         </div>
       </div>
-      <div [formGroupName]="emailGroup">
+
+      <div formGroupName="emailGroup">
         <div class="form-group row mb-2">
           <label class="col-md-2 col-form-label"
                  for="emailId">Email</label>
@@ -59,10 +60,10 @@
                    type="email"
                    placeholder="Email (required)"
                    formControlName="email"
-                   [ngClass]="{'is-invalid': customerForm.get(emailGroup).errors||
-                     (customerForm.get('emailGroup.email').touched ||
-                      customerForm.get('emailGroup.email').dirty) &&
-                       !customerForm.get('emailGroup.email').valid }" />
+                   [ngClass]="{'is-invalid': customerForm.get('emailGroup').errors ||
+                                            ((customerForm.get('emailGroup.email').touched ||
+                                              customerForm.get('emailGroup.email').dirty) && 
+                                              !customerForm.get('emailGroup.email').valid) }" />
             <span class="invalid-feedback">
               <span *ngIf="customerForm.get('emailGroup.email').errors?.required">
                 Please enter your email address.
@@ -83,16 +84,22 @@
                    type="email"
                    placeholder="Confirm Email (required)"
                    formControlName="confirmEmail"
-                   [ngClass]="{'is-invalid': (customerForm.get('emailGroup.confirmEmail').touched || customerForm.get('emailGroup.confirmEmail').dirty) && !customerForm.get('emailGroup.confirmEmail').valid }" />
+                   [ngClass]="{'is-invalid': customerForm.get('emailGroup').errors ||
+                                             ((customerForm.get('emailGroup.confirmEmail').touched || 
+                                             customerForm.get('emailGroup.confirmEmail').dirty) && 
+                                             !customerForm.get('emailGroup.confirmEmail').valid) }" />
             <span class="invalid-feedback">
               <span *ngIf="customerForm.get('emailGroup.confirmEmail').errors?.required">
                 Please confirm your email address.
               </span>
-
+              <span *ngIf="customerForm.get('emailGroup').errors?.match">
+                The confirmation does not match the email address.
+              </span>
             </span>
           </div>
         </div>
       </div>
+
       <div class="form-group row mb-2">
         <label class="col-md-2 col-form-label"
                for="phoneId">Phone</label>
@@ -102,18 +109,17 @@
                  type="tel"
                  placeholder="Phone"
                  formControlName="phone"
-                 [ngClass]="{'is-invalid': (customerForm.get('phone').touched || customerForm.get('phone').dirty) && !customerForm.get('phone').valid }" />
+                 [ngClass]="{'is-invalid': !customerForm.get('phone').valid }" />
           <span class="invalid-feedback">
             <span *ngIf="customerForm.get('phone').errors?.required">
               Please enter your phone number.
             </span>
-
           </span>
         </div>
       </div>
 
       <div class="form-group row mb-2">
-        <label class="col-md-2 col-form-label pt-0">Send notifications</label>
+        <label class="col-md-2 col-form-label pt-0">Send Notifications</label>
         <div class="col-md-8">
           <div class="form-check form-check-inline">
             <label class="form-check-label">
@@ -121,8 +127,7 @@
                      type="radio"
                      value="email"
                      formControlName="notification"
-                     (click)="setNotification('email')">
-              Email
+                     (click)="setNotification('email')"> Email
             </label>
           </div>
           <div class="form-check form-check-inline">
@@ -131,8 +136,7 @@
                      type="radio"
                      value="text"
                      formControlName="notification"
-                     (click)="setNotification('text')">
-              Text
+                     (click)="setNotification('text')"> Text
             </label>
           </div>
         </div>
@@ -140,15 +144,15 @@
 
       <div class="form-group row mb-2">
         <label class="col-md-2 col-form-label"
-               for="ratingId">
-          Rating
-        </label>
+               for="ratingId">Rating</label>
         <div class="col-md-8">
           <input class="form-control"
                  id="ratingId"
                  type="number"
                  formControlName="rating"
-                 [ngClass]="{'is-invalid': (customerForm.get('rating').touched||customerForm.get('rating').dirty&&!customerForm.get('rating').valid)}" />
+                 [ngClass]="{'is-invalid': (customerForm.get('rating').touched || 
+                                           customerForm.get('rating').dirty) && 
+                                           !customerForm.get('rating').valid }" />
           <span class="invalid-feedback">
             <span *ngIf="customerForm.get('rating').errors?.range">
               Please rate your experience from 1 to 5.
@@ -157,21 +161,18 @@
         </div>
       </div>
 
-
-
-      <!-- <div class="form-group row mb-2">
+      <div class="form-group row mb-2">
         <div class="col-md-8">
           <div class="form-check">
             <label class="form-check-label">
               <input class="form-check-input"
                      id="sendCatalogId"
                      type="checkbox"
-                     [(ngModel)]="customer.sendCatalog"
-                     name="sendCatalog"> Send me your catalog
+                     formControlName="sendCatalog"> Send me your catalog
             </label>
           </div>
         </div>
-      </div> -->
+      </div>
 
       <!-- <div *ngIf="customer.sendCatalog">
         <div class="form-group row mb-2">
@@ -282,12 +283,12 @@
           <button class="btn btn-primary mr-3"
                   type="submit"
                   style="width:80px"
-                  [title]="signupForm.valid ? 'Save your entered data' : 'Disabled until the form data is valid'"
+                  [title]="customerForm.valid ? 'Save your entered data' : 'Disabled until the form data is valid'"
                   [disabled]="!customerForm.valid">
             Save
           </button>
-          <button type="button"
-                  class="btn btn-outline-secondary"
+          <button class="btn btn-outline-secondary"
+                  type="button"
                   (click)="populateTestData()">
             Test Data
           </button>
